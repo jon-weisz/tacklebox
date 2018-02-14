@@ -10,11 +10,11 @@ from components import rendering_component
 from components import host_x_component
 from tools import docker_subprocess
 from tools import subcommand
-
+from tools import docker_ps
 reload(rendering_component)
 reload(host_x_component)
 reload(docker_subprocess)
-
+reload(docker_ps)
 
 class Helper():
     def __init__(self):

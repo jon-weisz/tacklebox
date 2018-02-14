@@ -10,7 +10,7 @@ from tacklebox.components import rendering_component
 from tacklebox.components import host_x_component
 from tacklebox.tools import docker_subprocess
 from tacklebox.tools import subcommand
-
+from tacklebox.tools import docker_ps
 
 
 class TackleBox(subcommand.CLICommands):
@@ -70,8 +70,28 @@ class TackleBox(subcommand.CLICommands):
 
         return merged_dict
 
+    def __get_container__name(self, image, name):
+        """
+        """
+        container_names = docker_ps.DockerRunPS().container_names()
+        if name and name in container_names:
+            logging.error('container name {} already in use. Remove using docker rm {} to reuse.'.format(name))
+            return None
+
+        if not name:
+            n = 'tackle_{}'.format(image)
+            for i in xrange(1000):
+                test_name = '{}_{}'.format(n, i)
+                if test_name in container_names:
+                    continue
+                return test_name
+            logging.error('Too may containers default name: {} for this image. Please remove some.'.format(n))
+            return ''
+        return name
+
     def run(self, image="ubuntu:trusty", rm=True, 
-            interactive=False, options="", command="/bin/bash"):
+            interactive=False, options="",
+            command="/bin/bash", name=None):
         """
         docker run with automatic hardware library and device flags automatically derived and passed to docker run.
 
@@ -85,9 +105,11 @@ class TackleBox(subcommand.CLICommands):
         :type options: str
         :param command: The command to run in the docker container. 
         :type command: str
+        :param name: The name to assign to the docker container. If None is given, a default name 'tackle-image_name-###'
+        :type name: str
         """
-        
-        docker_runner = docker_subprocess.DockerRunPopen(image, interactive=interactive, dockerargs=self.__get_component_arguments(),rm=rm)
+        options_args = options.split(',')
+        docker_runner = docker_subprocess.DockerRunPopen(image, interactive=interactive, dockerargs=self.__get_component_arguments() + options_args,rm=rm, name=name)
         process = docker_runner(command)
         (stdout,stderr) = process.communicate()
 

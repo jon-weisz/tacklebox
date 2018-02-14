@@ -3,9 +3,10 @@ import subprocess
 import logging
 import shlex
 
+
 class DockerRunPopen(object):
     def __init__(self, image_name="ubuntu:trusty", rm=True,
-                 interactive=False, dockerargs=[]):
+                 interactive=False, dockerargs=[], name=None):
         """A wrapper for popen that runs the command in a docker image
 
         :param image_name: The name of the image to run
@@ -19,6 +20,7 @@ class DockerRunPopen(object):
         self.dockerargs = dockerargs
         self.rm = rm
         self.interactive = interactive
+        self.name = name
 
     def __call__(self, command_args, **kwargs):
         """Call the popen
@@ -46,6 +48,8 @@ class DockerRunPopen(object):
             command_list.extend(["-ti"])
         command_list.append('--rm={}'.format(self.rm).lower())
         command_list.extend(self.dockerargs)
+        if self.name:
+            command_list.append('--name=}{}'.format(self.name))
         command_list.append(self.image_name)
         command_list.append('"{}"'.format(command_args))
         logging.warn(' '.join(command_list))

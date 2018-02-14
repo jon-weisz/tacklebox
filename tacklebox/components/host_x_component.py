@@ -32,6 +32,10 @@ class HostXComponent(base_component.BaseComponent):
         display = self.__get_display_args()        
 
         args="xauth nlist %s | sed -e 's/^..../ffff/' | xauth -f %s nmerge -"%(display, xauthFilename)
+
+        p = subprocess.Popen(args , shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print p.stdout.read()
+        args="chmod a+r {}".format(xauthFilename)
         p = subprocess.Popen(args , shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print p.stdout.read()
 
